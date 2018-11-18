@@ -9,26 +9,29 @@ function setup() {
   strokeWeight(20);
   frameRate(30);
   fill(0,0,0,0);
+  rectMode(CENTER);
 }
 
-var circles = [];
+var rects = [];
 
-function Circle(x, y, r) {
+function Rect(x, y, width, height, transformArray) {
   this.x = x;
   this.y = y;
-  this.r = r;
+  this.width = width;
+  this.height = height
   this.colorR = 255 * random();
   this.colorG = 255 * random();
   this.colorB = 255 * random();
   this.colorA = 255 * random();
+  this.transformCounter = 1;
+  this.transformArray = transformArray;
 
-  this.increaseSize = function() {
-    if (this.r < windowWidth * 1.5) {
-      this.r += 20;
-      this.y += 5;
+  this.shiftAround = function(array) {
+    if (this.transformCounter < windowWidth / 2) {
+      this.transformCounter++
     }
     else {
-      circles.shift();
+      rects.shift();
     }
   }
 }
@@ -36,13 +39,23 @@ function Circle(x, y, r) {
 function draw() {
     clear();
     background(0);
-    random() < 0.5 ? circles.push(new Circle(windowWidth / 2, -200, 100)) : '';
 
-    circles.forEach(function(circle) {
-      stroke(0, 100, 200, 100);
-      circle.increaseSize.bind(circle)();
-      ellipse(circle.x, circle.y, circle.r);
+    rects.forEach(function(rectangle, index) {
+      fill(256, 256, 256, 50);
+      rectangle.shiftAround.bind(rectangle)();
+      translate(rectangle.transformCounter * rectangle.transformArray[0], rectangle.transformCounter * rectangle.transformArray[1]);
+      console.log(index + ' index ____ ' + rectangle.transformCounter * rectangle.transformArray[0], rectangle.transformCounter * rectangle.transformArray[1]);
+      rect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+      translate(rectangle.transformCounter * rectangle.transformArray[0] * -1, rectangle.transformCounter * rectangle.transformArray[1] * -1);
     });
+}
+
+function mouseClicked (e) {
+  rects.push(new Rect(windowWidth / 2, windowHeight / 2, 100, 100, [1,1]));
+  rects.push(new Rect(windowWidth / 2, windowHeight / 2, 100, 100, [1,-1]));
+  rects.push(new Rect(windowWidth / 2, windowHeight / 2, 100, 100, [-1,1]));
+  rects.push(new Rect(windowWidth / 2, windowHeight / 2, 100, 100, [-1,-1]));
+  return false;
 }
 
 window.addEventListener('keydown', function(e) {
@@ -51,10 +64,6 @@ window.addEventListener('keydown', function(e) {
   else if (e.keyCode === 40)
     k -= 5;
 });
-
-function mouseClicked() {
-  redraw();
-}
 
 function randomSign() {
   return random() < 0.5 ? -1 : 1;
